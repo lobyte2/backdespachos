@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # Tu microservicio de despachos
+  back-despachos:
+    build: .
+    container_name: back-despacho-app
+    ports:
+      - "8080:8080"
+    networks:
+      - red-interna-despacho
+    depends_on:
+      - db-despacho
+
+  # Base de datos para demostrar persistencia (IE3)
+  db-despacho:
+    image: mysql:8.0
+    container_name: db-despacho
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: despacho_db
+    # Requisito IE3: Uso de volúmenes para persistencia
+    volumes:
+      - datos-db-despacho:/var/lib/mysql
+    networks:
+      - red-interna-despacho
+
+networks:
+  # Requisito IE2: Configuración de redes internas
+  red-interna-despacho:
+    driver: bridge
+
+volumes:
+  # Definición del volumen para que los datos no se pierdan
+  datos-db-despacho:
