@@ -1,0 +1,49 @@
+name: Deploy a AWS EC2
+
+on:
+  push:
+    branches:
+      - deploy
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
+
+      - name: Configurar Java JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17' 
+          distribution: 'temurin'
+
+
+      - name: Compilar proyecto con Maven
+        working-directory: ./Springboot-API-REST-DESPACHO
+        run: mvn clean package -DskipTests
+
+      - name: Iniciar sesión en Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # AQUI TAMBIÉN: Le decimos que el Dockerfile está en esta carpeta
+      - name: Construir y Subir Imagen Docker
+        working-directory: ./Springboot-API-REST-DESPACHO
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/backdespachos:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/backdespachos:latest
+
+      - name: Desplegar en EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/backdespachos:latest
+            sudo docker stop backdespachos || true
+            sudo docker rm backdespachos || true
+            sudo docker run -d -p 8080:8080 --name backdespachos ${{ secrets.DOCKER_USERNAME }}/backdespachos:latest
