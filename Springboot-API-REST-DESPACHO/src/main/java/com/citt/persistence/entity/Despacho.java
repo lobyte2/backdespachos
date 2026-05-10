@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
 
@@ -19,14 +21,17 @@ public class Despacho {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long idDespacho;
-    //@NotNull(message = "Fecha de despacho es obligatoria")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)  // Especifica el formato de fecha
+    
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate fechaDespacho;
+    
     private String patenteCamion;
     private int intento;
     private Long idCompra;
-    //@NotBlank(message = "La dirección es obligatoria")
     private String direccionCompra;
     private Long valorCompra;
+
+    // Cambios mínimos:
+    @JsonAlias({"despachado", "entregado"}) 
     private boolean despachado = false;
 }
