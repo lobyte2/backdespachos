@@ -7,7 +7,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Etapa 2: Runtime (Seguridad y Optimización) [cite: 39, 220]
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 
 # Ejecución con usuario no root (Requisito IE1 / Seguridad) [cite: 37, 258]
